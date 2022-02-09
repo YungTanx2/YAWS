@@ -1,6 +1,7 @@
 
 
 from ast import If
+from re import L
 
 
 class Letter:
@@ -146,7 +147,6 @@ class WordGuessTracker:
 allZeWords = [line.rstrip() for line in open('5letterwords.txt')]
 
 #apparently need to remove new line characters
-
 howmanywords = len(allZeWords)
 #calculate "score" of each letter by counting occurrence
 #map of each letter, and uptick the score?
@@ -173,10 +173,33 @@ for word in allZeWords:
     #add to map
     wordscoredict[word] = score
 
+#TODO #2
+#first create word pairing scores
+    #kind of like with letters
+letterpairscore = {}
+for currentLetterIndex in range(0, len(allthewordsinaline) - 1):
+    letterpair = allthewordsinaline[currentLetterIndex] + allthewordsinaline[currentLetterIndex + 1]
+    if letterpair in letterpairscore:
+        letterpairscore[letterpair] += 1
+    else:
+        letterpairscore[letterpair] = 1
 
+betterwordscoredict = {}
+
+for word in allZeWords:
+    #calculate score
+    score = 0
+    temp = letterpairscore.copy()
+    for letterIndex in range(0, len(word) - 1):
+        currentLetterPair = word[letterIndex] + word[letterIndex + 1]
+        score += temp[currentLetterPair]
+        #this is the first guess of a letter, we want to avoid repeats, so setting score to 0
+        temp[currentLetterPair] = 0
+    #add to map
+    betterwordscoredict[word] = score
 #initialize word guess tracker
-wordguesstrackingobjectsuper = WordGuessTracker(letterscore, wordscoredict)
-
+#wordguesstrackingobjectsuper = WordGuessTracker(letterscore, wordscoredict)
+wordguesstrackingobjectsuper = WordGuessTracker(letterscore, betterwordscoredict)
 #determine best first letter word
 	#just… pop the top?
 thebestword = wordguesstrackingobjectsuper.GetCurrentBestGuess()
